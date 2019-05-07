@@ -1,0 +1,153 @@
+{
+    "title": "Adyen Payment Service",
+    "description": "A set of API endpoints that allow you to initiate, settle, and modify payments on the Adyen payments platform. You can use the API to accept card payments (including One-Click and 3D Secure), bank transfers, ewallets, and many other payment methods. For more information, refer to [Ecommerce integration](https://docs.adyen.com/developers/ecommerce-integration).",
+    "docsUrl": "",
+    "url": "https://api.apis.guru/v2/specs/adyen.com/PaymentService/30/openapi.json",
+    "envVars": {},
+    "credentials": {
+        "fields": {
+            "server": {
+                "label": "Server",
+                "viewClass": "SelectView",
+                "model": [
+                    "https://pal-test.adyen.com/pal/servlet/Payment/v30",
+                    "--- Custom URL"
+                ],
+                "required": true
+            },
+            "otherServer": {
+                "label": "Custom Server URL",
+                "viewClass": "TextFieldView"
+            }
+        }
+    },
+    "triggers": {
+        "startFlow": {
+            "main": "./lib/triggers/startFlow.js",
+            "type": "polling",
+            "title": "Start Flow",
+            "fields": {}
+        }
+    },
+    "actions": {
+        "post_adjustAuthorisation": {
+            "main": "./lib/actions/post_adjustAuthorisation.js",
+            "title": "Adjust the authorised amount",
+            "description": "Allows you to increase or decrease the authorised amount after the initial authorisation has taken place. This functionality enables tipping, improving the chances your authorisation will be valid, charging the shopper when they have already left the merchant premises, etc.\n\nFor more information, refer to [Adjust Authorisation](https://docs.adyen.com/developers/payment-modifications#adjustauthorisation).",
+            "fields": {
+                "verbose": {
+                    "viewClass": "CheckBoxView",
+                    "label": "Debug this step (log more data)"
+                }
+            },
+            "metadata": {
+                "in": "./lib/schemas/post_adjustAuthorisation.in.json",
+                "out": {
+                    "type": "object"
+                }
+            }
+        },
+        "post_authorise": {
+            "main": "./lib/actions/post_authorise.js",
+            "title": "Create a payment authorisation",
+            "description": "Creates a payment with a unique reference (`pspReference`) and attempts to obtain an authorisation hold. For cards, this amount can be captured or cancelled later. Non-card payment methods typically don't support this and will automatically capture as part of the authorisation.\n\nFor more information, refer to [Ecommerce quick integration](https://docs.adyen.com/developers/ecommerce-integration).",
+            "fields": {
+                "verbose": {
+                    "viewClass": "CheckBoxView",
+                    "label": "Debug this step (log more data)"
+                }
+            },
+            "metadata": {
+                "in": "./lib/schemas/post_authorise.in.json",
+                "out": {
+                    "type": "object"
+                }
+            }
+        },
+        "post_authorise3d": {
+            "main": "./lib/actions/post_authorise3d.js",
+            "title": "Complete a 3D Secure payment authorisation",
+            "description": "For an authenticated 3D Secure session, completes the payment authorisation. This endpoint must receive the `md` and `paResponse` parameters that you get from the card issuer after a shopper pays via 3D Secure.\n\nFor more information, refer to [3D Secure](https://docs.adyen.com/developers/risk-management/3d-secure).",
+            "fields": {
+                "verbose": {
+                    "viewClass": "CheckBoxView",
+                    "label": "Debug this step (log more data)"
+                }
+            },
+            "metadata": {
+                "in": "./lib/schemas/post_authorise3d.in.json",
+                "out": {
+                    "type": "object"
+                }
+            }
+        },
+        "post_cancel": {
+            "main": "./lib/actions/post_cancel.js",
+            "title": "Cancel a payment authorisation",
+            "description": "Cancels the authorisation hold on a payment, returning a unique reference for this request. You can cancel payments after authorisation only for payment methods that support distinct authorisations and captures.\n\nFor more information, refer to [Cancel](https://docs.adyen.com/developers/payment-modifications#cancel).",
+            "fields": {
+                "verbose": {
+                    "viewClass": "CheckBoxView",
+                    "label": "Debug this step (log more data)"
+                }
+            },
+            "metadata": {
+                "in": "./lib/schemas/post_cancel.in.json",
+                "out": {
+                    "type": "object"
+                }
+            }
+        },
+        "post_cancelOrRefund": {
+            "main": "./lib/actions/post_cancelOrRefund.js",
+            "title": "Cancel or refund a payment",
+            "description": "Cancels a payment if it has not yet been captured yet, or refunds it if it has already been captured. This is useful when it is not certain if the payment has been captured or not (for example, when using auto-capture).\n\nFor more information, refer to [Cancel or refund](https://docs.adyen.com/developers/payment-modifications#cancelorrefund).",
+            "fields": {
+                "verbose": {
+                    "viewClass": "CheckBoxView",
+                    "label": "Debug this step (log more data)"
+                }
+            },
+            "metadata": {
+                "in": "./lib/schemas/post_cancelOrRefund.in.json",
+                "out": {
+                    "type": "object"
+                }
+            }
+        },
+        "post_capture": {
+            "main": "./lib/actions/post_capture.js",
+            "title": "Capture a payment authorisation",
+            "description": "Captures the authorisation hold on a payment, returning a unique reference for this request. Usually the full authorisation amount is captured, however it's also possible to capture a smaller amount, which results in cancelling the remaining authorisation balance.\n\nPayment methods, which automatically capture as part of authorisation, don't need to be captured, but submitting a capture request on these transactions will not result in double charges. If immediate or delayed auto-capture is enabled, calling the capture method is not neccessary.\n\nFor more information, refer to [Capture](https://docs.adyen.com/developers/payment-modifications#capture).",
+            "fields": {
+                "verbose": {
+                    "viewClass": "CheckBoxView",
+                    "label": "Debug this step (log more data)"
+                }
+            },
+            "metadata": {
+                "in": "./lib/schemas/post_capture.in.json",
+                "out": {
+                    "type": "object"
+                }
+            }
+        },
+        "post_refund": {
+            "main": "./lib/actions/post_refund.js",
+            "title": "Refund a payment",
+            "description": "Refunds a payment that has previously been captured, returning a unique reference for this request. Refunding can be done on the full captured amount or a partial amount. Multiple (partial) refunds will be accepted as long as their sum doesn't exceed the captured amount. Payments which have been authorised, but not captured, cannot be refunded, use the /cancel method instead.\n\n> Some payment methods/gateways do not support partial/multiple refunds.\n> A margin above the captured limit can be configured to cover shipping/handling costs.\n\nFor more information, refer to [Refund](https://docs.adyen.com/developers/payment-modifications#refund).",
+            "fields": {
+                "verbose": {
+                    "viewClass": "CheckBoxView",
+                    "label": "Debug this step (log more data)"
+                }
+            },
+            "metadata": {
+                "in": "./lib/schemas/post_refund.in.json",
+                "out": {
+                    "type": "object"
+                }
+            }
+        }
+    }
+}
